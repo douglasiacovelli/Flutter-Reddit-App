@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test_01/reddit_response.dart';
 import 'package:http/http.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
+import 'package:build_variants/build_variants.dart';
 
 void main() => runApp(MyApp());
 
@@ -34,6 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _after;
   List<Post> _posts = [];
   bool _loading = false;
+  String _flavor;
   ScrollController _scrollController;
 
   @override
@@ -42,6 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _scrollController.addListener(_scrollListener);
     super.initState();
     _loadData();
+    _loadFlavor();
   }
 
   _scrollListener() {
@@ -84,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<RedditResponse> _fetchPosts() async {
     final response =
-        await get('https://www.reddit.com/r/Android/new/.json?after=$_after');
+    await get('https://www.reddit.com/r/Android/new/.json?after=$_after');
 
     if (response.statusCode == 200) {
       return RedditResponse.fromJson(json.decode(response.body));
@@ -97,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("${widget.title} ($_flavor)"),
       ),
       body: Center(
         child: Column(
@@ -106,7 +110,10 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(_success ? 'Posts: ' : 'Ocorreu um erro'),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .display1,
             ),
             Expanded(
               child: RefreshIndicator(
@@ -154,4 +161,24 @@ class _MyHomePageState extends State<MyHomePage> {
       throw 'Could not launch $url';
     }
   }
+
+  Future<void> _loadFlavor() async {
+    String platformVersion;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      platformVersion = await BuildVariants.getVariant;
+    } on PlatformException {
+      platformVersion = 'Failed to get platform version.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _flavor = platformVersion;
+    });
+  }
+
 }
