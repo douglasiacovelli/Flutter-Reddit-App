@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:build_variants/build_variants.dart';
 
 void main() {
   const MethodChannel channel = MethodChannel('build_variants');
@@ -13,9 +12,5 @@ void main() {
 
   tearDown(() {
     channel.setMockMethodCallHandler(null);
-  });
-
-  test('getPlatformVersion', () async {
-    expect(await BuildVariants.platformVersion, '42');
   });
 }

@@ -88,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<RedditResponse> _fetchPosts() async {
     final response =
-    await get('https://www.reddit.com/r/Android/new/.json?after=$_after');
+        await get('https://www.reddit.com/r/Android/new/.json?after=$_after');
 
     if (response.statusCode == 200) {
       return RedditResponse.fromJson(json.decode(response.body));
@@ -110,10 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(_success ? 'Posts: ' : 'Ocorreu um erro'),
             Text(
               '$_counter',
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .display1,
+              style: Theme.of(context).textTheme.display1,
             ),
             Expanded(
               child: RefreshIndicator(
@@ -141,10 +138,20 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildTile(Post post) {
+    final hasUrl = post.thumbnail.startsWith("http");
+    final image = hasUrl
+        ? NetworkImage(
+            post.thumbnail,
+          )
+        : AssetImage("assets/images/reddit-icon.png");
+
     return ListTile(
-      leading: Image.network(
-        post.thumbnail,
-        width: 48,
+      leading: Container(
+        width: 72,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          image: DecorationImage(image: image),
+        ),
       ),
       title: Text(post.title),
       subtitle: Text('${post.ups}'),
@@ -180,5 +187,4 @@ class _MyHomePageState extends State<MyHomePage> {
       _flavor = platformVersion;
     });
   }
-
 }
